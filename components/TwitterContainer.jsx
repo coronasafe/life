@@ -1,9 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TwitterResultCard from '@components/TwitterResult';
 import useFetch from '@hooks/use-fetch';
 
 const Selector = ({ searchStr, resourceType, noRes, noResText }) => {
     const [covidConnectResults, loading] = useFetch({ city: searchStr, materialType: resourceType });
+    const [tweets, setTweets] = useState(covidConnectResults);
+    useEffect(() => {
+        const memo = {};
+        const filteredResults = covidConnectResults.filter(result => {
+            if(!(result.full_text in memo)) {
+                memo[result.full_text] = true;
+                return true;
+            }
+            return false;
+        });
+
+        setTweets(filteredResults);
+    }, [covidConnectResults, loading]);
 
     return (
         <div className="mb-2 h-full max-w-3xl mx-auto">
@@ -17,7 +30,7 @@ const Selector = ({ searchStr, resourceType, noRes, noResText }) => {
                 <TwitterResultCard
                     searchStr={searchStr}
                     loading={loading}
-                    covidConnectResults={covidConnectResults}
+                    covidConnectResults={tweets}
                 />
             )}
         </div>
@@ -25,3 +38,4 @@ const Selector = ({ searchStr, resourceType, noRes, noResText }) => {
 };
 
 export default Selector;
+
